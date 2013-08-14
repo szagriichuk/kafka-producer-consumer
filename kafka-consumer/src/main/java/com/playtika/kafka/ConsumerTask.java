@@ -33,17 +33,21 @@ public class ConsumerTask implements Runnable {
     public void run() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(loggingTask);
-        ConsumerIterator<Message> it = kafkaStream.iterator();
-        while (it.hasNext()) {
-            MessageAndMetadata<Message> data = it.next();
-            ByteBuffer payload = data.message().payload();
-            String stringData = new String(payload.array());
+        ConsumerIterator<Message> consumerIterator = kafkaStream.iterator();
+        while (consumerIterator.hasNext()) {
+            String stringData = readStringData(consumerIterator);
             this.readData.add(stringData);
             countOfMessages++;
         }
         loggingTask.setRunnable(false);
         executorService.shutdown();
         LOGGER.info("Shutting down Thread: " + threadNumber);
+    }
+
+    private String readStringData(ConsumerIterator<Message> it) {
+        MessageAndMetadata<Message> data = it.next();
+        ByteBuffer payload = data.message().payload();
+        return new String(payload.array());
     }
 
     public List<String> getReadData() {
