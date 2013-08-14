@@ -29,7 +29,7 @@ public class PlaytikaConsumer {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Load consumer properties" + consumerProperties);
         }
-        consumer = kafka.consumer.Consumer.createJavaConsumerConnector(new ConsumerConfig(createConsumerConfig()));
+        consumer = kafka.consumer.Consumer.createJavaConsumerConnector(new ConsumerConfig(createConsumerProperties()));
         this.topic = consumerProperties.get("topic");
     }
 
@@ -64,7 +64,7 @@ public class PlaytikaConsumer {
         }
     }
 
-    private Properties createConsumerConfig() {
+    private Properties createConsumerProperties() {
         Properties props = new Properties();
         props.put("zk.connect", consumerProperties.get("zkConnect"));
         props.put("groupid", consumerProperties.get("group"));
