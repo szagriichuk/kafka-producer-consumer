@@ -1,0 +1,1 @@
+mvn install:install-file -Dpackaging=jar -DgroupId=com.kafka -DartifactId=kafka -Dversion=0.7.2 -Dfile=kafka-0.7.2.jar

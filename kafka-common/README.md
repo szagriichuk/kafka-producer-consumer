@@ -1,0 +1,2 @@
+mvn install:install-file -Dpackaging=jar -DgroupId=com.scala -DartifactId=scala-compiler -Dversion=2.8.0 -Dfile=scala-compiler.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=com.scala -DartifactId=scala-library -Dversion=2.8.0 -Dfile=scala-library.jar
