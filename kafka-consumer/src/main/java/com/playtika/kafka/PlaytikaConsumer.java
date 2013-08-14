@@ -34,14 +34,18 @@ public class PlaytikaConsumer {
     }
 
     public static void main(String[] args) {
-        PlaytikaConsumer example = new PlaytikaConsumer();
-        example.run();
+        PlaytikaConsumer consumer = new PlaytikaConsumer();
+        consumer.run();
+        consumer.sleepFor10Seconds();
+        consumer.shutdown();
+    }
+
+    private void sleepFor10Seconds() {
         try {
             Thread.sleep(10000);
         } catch (InterruptedException ie) {
             LOGGER.error(ie.getMessage(), ie);
         }
-        example.shutdown();
     }
 
     public void shutdown() {
@@ -51,10 +55,7 @@ public class PlaytikaConsumer {
 
     public void run() {
         int numThreads = Integer.parseInt(consumerProperties.get("threads.number"));
-        Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-        topicCountMap.put(topic, numThreads);
-        Map<String, List<KafkaStream<Message>>> consumerMap = consumer.createMessageStreams(topicCountMap);
-        List<KafkaStream<Message>> streams = consumerMap.get(topic);
+        List<KafkaStream<Message>> streams = readListOfStreams(numThreads);
         executor = Executors.newFixedThreadPool(numThreads);
         int threadNumber = 0;
         for (final KafkaStream<Message> stream : streams) {
@@ -62,6 +63,13 @@ public class PlaytikaConsumer {
             executor.submit(new ConsumerTask(stream, threadNumber));
             threadNumber++;
         }
+    }
+
+    private List<KafkaStream<Message>> readListOfStreams(int numThreads) {
+        Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
+        topicCountMap.put(topic, numThreads);
+        Map<String, List<KafkaStream<Message>>> consumerMap = consumer.createMessageStreams(topicCountMap);
+        return consumerMap.get(topic);
     }
 
     private Properties createConsumerProperties() {

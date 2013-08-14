@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,6 +22,7 @@ public class ConsumerTask implements Runnable {
     private KafkaStream<Message> kafkaStream;
     private LoggingTask loggingTask;
     private int threadNumber;
+    private List<String> readData = new ArrayList<String>();
 
     public ConsumerTask(KafkaStream<Message> stream, int threadNumber) {
         loggingTask = new LoggingTask(threadNumber);
@@ -35,10 +38,15 @@ public class ConsumerTask implements Runnable {
             MessageAndMetadata<Message> data = it.next();
             ByteBuffer payload = data.message().payload();
             String stringData = new String(payload.array());
+            this.readData.add(stringData);
             countOfMessages++;
         }
         loggingTask.setRunnable(false);
         executorService.shutdown();
         LOGGER.info("Shutting down Thread: " + threadNumber);
+    }
+
+    public List<String> getReadData() {
+        return readData;
     }
 }
