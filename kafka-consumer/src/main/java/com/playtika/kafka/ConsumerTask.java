@@ -18,14 +18,14 @@ import java.util.concurrent.Executors;
  */
 public class ConsumerTask implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerTask.class);
-    public static volatile int countOfMessages;
+    public volatile int countOfMessages;
     private KafkaStream<Message> kafkaStream;
     private LoggingTask loggingTask;
     private int threadNumber;
-    private List<String> readData = new ArrayList<String>();
+    private List<MessageAndMetadata<Message>> readData = new ArrayList<MessageAndMetadata<Message>>();
 
     public ConsumerTask(KafkaStream<Message> stream, int threadNumber) {
-        loggingTask = new LoggingTask(threadNumber);
+        loggingTask = new LoggingTask(threadNumber, this);
         this.threadNumber = threadNumber;
         kafkaStream = stream;
     }
@@ -35,13 +35,16 @@ public class ConsumerTask implements Runnable {
         executorService.execute(loggingTask);
         ConsumerIterator<Message> consumerIterator = kafkaStream.iterator();
         while (consumerIterator.hasNext()) {
-            String stringData = readStringData(consumerIterator);
-            this.readData.add(stringData);
+            readData.add(consumerIterator.next());
+//            LOGGER.info(consumerIterator.next().message().toString());
+
+//            String stringData = readStringData(consumerIterator);
+//            this.readData.add(stringData);
             countOfMessages++;
         }
         loggingTask.setRunnable(false);
         executorService.shutdown();
-        LOGGER.info("Shutting down Thread: " + threadNumber);
+        LOGGER.info("Shutting down ConsumerTask with number: " + threadNumber);
     }
 
     private String readStringData(ConsumerIterator<Message> it) {
@@ -50,7 +53,7 @@ public class ConsumerTask implements Runnable {
         return new String(payload.array());
     }
 
-    public List<String> getReadData() {
+    public List<MessageAndMetadata<Message>> getReadData() {
         return readData;
     }
 }
