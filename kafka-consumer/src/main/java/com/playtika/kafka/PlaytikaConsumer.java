@@ -35,17 +35,33 @@ public class PlaytikaConsumer {
 
     public static void main(String[] args) {
         PlaytikaConsumer consumer = new PlaytikaConsumer();
+        LOGGER.info("Run consumer tasks");
         consumer.run();
-        consumer.sleepFor10Seconds();
+        LOGGER.info("Wait " + consumer.getWorkingTime() + " for consumer tasks will be finished");
+        consumer.sleepForSeconds(consumer.getWorkingTime());
+        LOGGER.info("ShoutDown Playtika Consumer.");
         consumer.shutdown();
     }
 
-    private void sleepFor10Seconds() {
+    private long getWorkingTime() {
+        return prepareTime(Integer.parseInt(consumerProperties.get("working.time")));
+    }
+
+    private void sleepForSeconds(long time) {
         try {
-            Thread.sleep(10000);
+            LOGGER.info("Sleeping time is " + time);
+            Thread.sleep(time);
         } catch (InterruptedException ie) {
             LOGGER.error(ie.getMessage(), ie);
         }
+    }
+
+    private long prepareTime(int time) {
+        int preparedTime = time;
+        if (preparedTime < 0) {
+            preparedTime = Integer.MAX_VALUE;
+        }
+        return preparedTime * 1000;
     }
 
     public void shutdown() {
